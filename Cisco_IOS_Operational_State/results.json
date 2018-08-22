@@ -1,0 +1,10 @@
+{
+  "Successful": [
+    "192.168.1.11",
+    "192.168.76.2",
+    "192.168.77.2"
+  ],
+  "Failed": [
+    "10.168.77.2.Connection to device timed-out: cisco_ios 10.168.77.2:22"
+  ]
+}
