@@ -3,10 +3,10 @@ import netmiko
 import csv
 import json
 
-
+#######################NOT TESTED YET
 #################################################################################################
-#Script connects to cisco_ios device extracts vlan data, parses with textfsm, then              #
-#outputs to .csv "sho_vlan.csv"                                                                 #
+#Script connects to cisco_ios device extracts spanning-tree data, parses with textfsm, then #
+#outputs to .csv "spanning_tree_status.csv"                                                           #
 #################################################################################################
 
 
@@ -42,7 +42,7 @@ with open('devices.json') as dev_file:
 
 
 
-vlan_results = []
+spanning_tree_results = []
 
 results = {'Successful':[], 'Failed':[]}
 
@@ -56,11 +56,11 @@ for device in devices:
         connection = netmiko.ConnectHandler(**device)
         local_host = (connection.find_prompt())
         print(local_host)
-        output = connection.send_command("show vlan", use_textfsm=True)##textfsm integrated into Netmiko
+        output = connection.send_command("show spanning-tree", use_textfsm=True)##textfsm integrated into Netmiko
 
         for item in output:
             item.update({"local_host":local_host})#Insert Local Hostname into dictionary
-            vlan_results.append(item) #For Loop to append the OUTPUT results from connection.send_command
+            spanning_tree_results.append(item) #For Loop to append the OUTPUT results from connection.send_command
 
 
         connection.disconnect()
@@ -70,19 +70,19 @@ for device in devices:
         print('Failed to', device, e)
         results['Failed'].append('.'.join((device['ip'], str(e))))
 
-print(vlan_results)
+print(spanning_tree_results)
 
 print(json.dumps(results, indent=2))
-with open('vlan_results.json', 'w') as results_file:
+with open('spanning_tree_results.json', 'w') as results_file:
     json.dump(results, results_file, indent=2)
 
 
-with open('sho_vlan.csv','w', newline='')as new_file:
-   fieldnames = ['local_host','vlan_id','name','status', 'interfaces']
+with open('spanning_tree_status.csv','w', newline='')as new_file:
+   fieldnames = ['local_host','cost','interface','port_id','port_priority' 'role', 'status', 'type', 'vlan_id']
    csv_writer = csv.DictWriter(new_file, fieldnames=fieldnames, delimiter=',')
 
    csv_writer.writeheader()
 
-   for line in (vlan_results):
+   for line in (spanning_tree_results):
      csv_writer.writerow(line)
      print(line)

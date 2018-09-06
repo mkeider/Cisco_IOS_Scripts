@@ -5,8 +5,8 @@ import json
 
 
 #################################################################################################
-#Script connects to cisco_ios device extracts vlan data, parses with textfsm, then              #
-#outputs to .csv "sho_vlan.csv"                                                                 #
+#Script connects to cisco_ios device extracts HSRP standby-brief data, parses with textfsm, then #
+#outputs to .csv "HSRP_standby_brief.csv"                                                           #
 #################################################################################################
 
 
@@ -42,7 +42,7 @@ with open('devices.json') as dev_file:
 
 
 
-vlan_results = []
+hsrp_results = []
 
 results = {'Successful':[], 'Failed':[]}
 
@@ -56,11 +56,11 @@ for device in devices:
         connection = netmiko.ConnectHandler(**device)
         local_host = (connection.find_prompt())
         print(local_host)
-        output = connection.send_command("show vlan", use_textfsm=True)##textfsm integrated into Netmiko
+        output = connection.send_command("show standby brief", use_textfsm=True)##textfsm integrated into Netmiko
 
         for item in output:
             item.update({"local_host":local_host})#Insert Local Hostname into dictionary
-            vlan_results.append(item) #For Loop to append the OUTPUT results from connection.send_command
+            hsrp_results.append(item) #For Loop to append the OUTPUT results from connection.send_command
 
 
         connection.disconnect()
@@ -70,19 +70,19 @@ for device in devices:
         print('Failed to', device, e)
         results['Failed'].append('.'.join((device['ip'], str(e))))
 
-print(vlan_results)
+print(hsrp_results)
 
 print(json.dumps(results, indent=2))
-with open('vlan_results.json', 'w') as results_file:
+with open('hsrp_results.json', 'w') as results_file:
     json.dump(results, results_file, indent=2)
 
 
-with open('sho_vlan.csv','w', newline='')as new_file:
-   fieldnames = ['local_host','vlan_id','name','status', 'interfaces']
+with open('hsrp_standby_brief.csv','w', newline='')as new_file:
+   fieldnames = ['local_host','iface','group','priority', 'preempt', 'state', 'active','standby','virtualip']
    csv_writer = csv.DictWriter(new_file, fieldnames=fieldnames, delimiter=',')
 
    csv_writer.writeheader()
 
-   for line in (vlan_results):
+   for line in (hsrp_results):
      csv_writer.writerow(line)
      print(line)

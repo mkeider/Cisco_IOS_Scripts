@@ -56,7 +56,7 @@ for device in devices:
         connection = netmiko.ConnectHandler(**device)
         local_host = (connection.find_prompt())
         print(local_host)
-        output = connection.send_command("show standby brief", use_textfsm=True)##textfsm integrated into Netmiko
+        output = connection.send_command("show lldp neighbors", use_textfsm=True)##textfsm integrated into Netmiko
 
         for item in output:
             item.update({"local_host":local_host})#Insert Local Hostname into dictionary
